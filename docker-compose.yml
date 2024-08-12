@@ -1,0 +1,37 @@
+services:
+  nginx:
+    build:
+      context: .
+      dockerfile: Dockerfile-nginx
+    restart: always
+    volumes:
+      - .:/var/www
+      - 'seostorage:/var/www/storage'
+    ports:
+      - '${APP_PORT:-8050}:80'
+    links:
+      - "core:php-fpm"
+    depends_on:
+      - "core"
+  core:
+    build:
+      context: .
+      dockerfile: Dockerfile-phpfpm
+    restart: always
+    volumes:
+      - .:/var/www
+      - 'seostorage:/var/www/storage'
+  sched:
+    build:
+      context: .
+      dockerfile: Dockerfile-phpfpm
+    command: /usr/local/bin/start
+    restart: always
+    volumes:
+      - .:/var/www
+      - 'seostorage:/var/www/storage'
+    user: "82:82" # www-data user
+
+volumes:
+  seostorage:
+    driver: local
